@@ -6,22 +6,67 @@ pool:
 
 variables:
   azureServiceConnection: 'Azure-Service-Connection'
-  resourceGroupName: 'rg-arm-pipeline'
+  resourceGroupName: 'rg-devops-webapp'
   location: 'East US'
-  webAppName: 'armwebapppipe123'
+  webAppName: 'devopswebapp12345'
 
-steps:
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: $(azureServiceConnection)
-    scriptType: bash
-    scriptLocation: inlineScript
-    inlineScript: |
-      az group create \
-        --name $(resourceGroupName) \
-        --location "$(location)"
+stages:
+# ---------------- INFRA ----------------
+- stage: Infrastructure
+  jobs:
+  - job: DeployInfra
+    steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az group create \
+            --name $(resourceGroupName) \
+            --location "$(location)"
 
-      az deployment group create \
-        --resource-group $(resourceGroupName) \
-        --template-file azuredeploy.json \
-        --parameters webAppName=$(webAppName)
+          az deployment group create \
+            --resource-group $(resourceGroupName) \
+            --template-file azuredeploy.json \
+            --parameters webAppName=$(webAppName)
+
+# ---------------- APP TO STAGING ----------------
+- stage: Deploy_Staging
+  dependsOn: Infrastructure
+  jobs:
+  - job: DeployToStaging
+    steps:
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: 'app'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+        replaceExistingArchive: true
+
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        appType: webAppLinux
+        appName: $(webAppName)
+        slotName: staging
+        package: '$(Build.ArtifactStagingDirectory)/app.zip'
+
+# ---------------- SLOT SWAP ----------------
+- stage: Swap_To_Production
+  dependsOn: Deploy_Staging
+  jobs:
+  - job: SwapSlots
+    steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az webapp deployment slot swap \
+            --resource-group $(resourceGroupName) \
+            --name $(webAppName) \
+            --slot staging \
+            --target-slot production
