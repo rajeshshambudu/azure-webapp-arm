@@ -25,9 +25,27 @@ This project demonstrates a complete DevOps pipeline using:
 
 ## Folder Structure
 
+azure-webapp-devops/
+├── app/
+├── azuredeploy.json
+├── azure-pipelines.yml
+└── README.md
+
+
+## Key DevOps Concepts
+- Infrastructure as Code (IaC)
+- CI/CD automation
+- Deployment slots
+- Zero-downtime deployment
+
+## Interview Summary
+This project shows how to automate Azure infrastructure provisioning and application deployment using ARM templates and Azure DevOps pipelines.
+
 
 
 #####################
+
+Test ARM template locally (important)
 
 step-1 Login to Azure
 
