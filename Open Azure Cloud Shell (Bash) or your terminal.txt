@@ -1,0 +1,16 @@
+step-1 Login to Azure
+
+az login
+
+step-2 Create a resource group
+
+az group create \
+  --name rg-arm-demo \
+  --location "East US"
+
+step-3 Deploy the ARM template
+
+az deployment group create \
+  --resource-group rg-arm-demo \
+  --template-file azuredeploy.json \
+  --parameters webAppName=myarmwebapp123
