@@ -1,0 +1,27 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  azureServiceConnection: 'Azure-Service-Connection'
+  resourceGroupName: 'rg-arm-pipeline'
+  location: 'East US'
+  webAppName: 'armwebapppipe123'
+
+steps:
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az group create \
+        --name $(resourceGroupName) \
+        --location "$(location)"
+
+      az deployment group create \
+        --resource-group $(resourceGroupName) \
+        --template-file azuredeploy.json \
+        --parameters webAppName=$(webAppName)
