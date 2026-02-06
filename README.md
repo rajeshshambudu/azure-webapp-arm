@@ -44,6 +44,7 @@ This project shows how to automate Azure infrastructure provisioning and applica
 
 
 #####################
+Unit Testing Infra Before Automation
 
 Test ARM template locally (important)
 
