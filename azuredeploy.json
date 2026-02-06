@@ -14,7 +14,7 @@
     {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2022-03-01",
-      "name": "simpleAppServicePlan",
+      "name": "devopsAppServicePlan",
       "location": "[parameters('location')]",
       "sku": {
         "name": "B1",
@@ -30,15 +30,30 @@
       "name": "[parameters('webAppName')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "simpleAppServicePlan"
+        "devopsAppServicePlan"
       ],
       "properties": {
-        "serverFarmId": "simpleAppServicePlan",
+        "serverFarmId": "devopsAppServicePlan",
         "siteConfig": {
           "linuxFxVersion": "NODE|18-lts"
         }
-      }
+      },
+      "resources": [
+        {
+          "type": "slots",
+          "apiVersion": "2022-03-01",
+          "name": "staging",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[parameters('webAppName')]"
+          ],
+          "properties": {
+            "siteConfig": {
+              "linuxFxVersion": "NODE|18-lts"
+            }
+          }
+        }
+      ]
     }
   ]
 }
-
